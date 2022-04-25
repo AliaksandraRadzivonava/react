@@ -2,8 +2,8 @@
     box-sizing: border-box;
     border: solid rgb(58, 122, 206) 3px;
     padding: 10px;
-    max-width: 1200px;
-    margin: 10px auto;
+    margin-top: 19px;
+    min-height:100%
 }
 
 button {

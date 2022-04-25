@@ -3,40 +3,84 @@ import './App.css';
 import Courses from './components/Courses/Courses';
 import Header from './components/Header/Header';
 import CreateCourse from './components/CreateCourse/CreateCourse';
-import { mockedCoursesList, mockedAuthorsList } from './constants';
+import CourseInfo from './components/CourseInfo/CourseInfo';
+
+import Registration from './components/Registration/Registration';
+import Login from './components/Login/Login';
+import { useAuthors, useCourses } from './services';
+
+import { Routes, Route, Navigate } from 'react-router-dom';
+
+import { useDispatch } from 'react-redux';
+import { coursesLoaded } from './store/courses/actionCreators';
+import { authorsLoaded } from './store/authors/actionCreators';
+import { selectIsLoggedIn } from './store/user/userSelectors';
+import { useSelector } from 'react-redux';
+import { useEffect } from 'react';
 
 function App() {
-	const [isCreateTab, setIsCreateTab] = useState(false);
-	const [courses, setCourses] = useState(mockedCoursesList);
-	const [authors, setAuthors] = useState(mockedAuthorsList);
+	const [isLoggedIn, setIsLoggedIn] = useState(
+		useSelector(selectIsLoggedIn) || !!localStorage.getItem('token')
+	);
+	const [coursesData, coursesLoading, coursesError] = useCourses();
+	const [authorsData, authorsLoading, authorsError] = useAuthors();
 
-	const onCreateAuthorHandle = (author) => {
-		if (
-			!authors.find((existingAuthor) => author.name === existingAuthor.name)
-		) {
-			setAuthors([...authors, author]);
-		}
-	};
+	const dispatch = useDispatch();
+
+	useEffect(() => {
+		dispatch(coursesLoaded(coursesData));
+		dispatch(authorsLoaded(authorsData));
+	}, [authorsData, coursesData, dispatch]);
 
 	return (
 		<>
-			<Header className='header' userName='Alex' />
-			{isCreateTab ? (
-				<CreateCourse
-					authors={authors}
-					onCreateAuthor={onCreateAuthorHandle}
-					onCreateCourse={(course) => {
-						setCourses([...courses, course]);
-						setIsCreateTab(false);
-					}}
+			<Header
+				className='header'
+				isLoggedIn={isLoggedIn}
+				onLogout={() => setIsLoggedIn(false)}
+			/>
+			{(coursesLoading || authorsLoading) && <h1>Loading ...</h1>}
+			{(coursesError || authorsError) && <h1>Error fetching data...</h1>}
+			<Routes>
+				<Route
+					exact
+					path='/'
+					element={<Navigate to={isLoggedIn ? '/courses' : '/login'} />}
 				/>
-			) : (
-				<Courses
-					onAddNewCourseClick={() => setIsCreateTab(true)}
-					courses={courses}
-					authors={authors}
+				<Route path='/registration' element={<Registration />} />
+				<Route
+					path='/login'
+					element={
+						isLoggedIn ? (
+							<Navigate to={'/courses'} />
+						) : (
+							<Login onLogin={() => setIsLoggedIn(true)} />
+						)
+					}
 				/>
-			)}
+				<Route
+					path='/courses'
+					exact
+					element={
+						isLoggedIn ? (
+							<Courses />
+						) : (
+							<Navigate to={isLoggedIn ? '/courses' : '/login'} />
+						)
+					}
+				/>
+				<Route
+					path='/courses/add'
+					element={
+						isLoggedIn ? (
+							<CreateCourse />
+						) : (
+							<Navigate to={isLoggedIn ? '/courses' : '/login'} />
+						)
+					}
+				/>
+				<Route path='/courses/:courseId' element={<CourseInfo />} />
+			</Routes>
 		</>
 	);
 }
