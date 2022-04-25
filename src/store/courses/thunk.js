@@ -26,7 +26,7 @@ export const courseSavedThunk =
 	};
 
 export const courseDeletedThunk = (token, id) => async (dispatch, getState) => {
-	const request = await fetch(`${url}/courses/${id}`, {
+	await fetch(`${url}/courses/${id}`, {
 		method: 'DELETE',
 		body: JSON.stringify({ id }),
 		headers: {

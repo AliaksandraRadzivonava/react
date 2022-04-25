@@ -17,12 +17,12 @@ export const loginThunk = (token) => async (dispatch, getState) => {
 		token: token,
 		role: result.role,
 	};
-	console.log('login action dispatched');
+
 	dispatch(login(user));
 };
 
 export const logoutThunk = (token) => async (dispatch, getState) => {
-	const request = await fetch(`${url}/logout`, {
+	await fetch(`${url}/logout`, {
 		method: 'DELETE',
 		headers: {
 			'Content-Type': 'application/json',
