@@ -3,7 +3,8 @@
     border: solid rgb(58, 122, 206) 3px;
     padding: 10px;
     max-width: 1200px;
-    margin: 10px auto;
+    margin: 19px auto;
+    min-height:100%
 }
 
 button {
